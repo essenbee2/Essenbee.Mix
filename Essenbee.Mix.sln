@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32421.90
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Essenbee.Mix", "Essenbee.Mix\Essenbee.Mix.csproj", "{980B56B0-593E-4BDC-9394-32313EE9D459}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Essenbee.Mix.Tests", "Essenbee.Mix.Tests\Essenbee.Mix.Tests.csproj", "{C74E6133-ACFE-4BF6-B647-25E1C74005B4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{980B56B0-593E-4BDC-9394-32313EE9D459}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{980B56B0-593E-4BDC-9394-32313EE9D459}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{980B56B0-593E-4BDC-9394-32313EE9D459}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{980B56B0-593E-4BDC-9394-32313EE9D459}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C74E6133-ACFE-4BF6-B647-25E1C74005B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C74E6133-ACFE-4BF6-B647-25E1C74005B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C74E6133-ACFE-4BF6-B647-25E1C74005B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C74E6133-ACFE-4BF6-B647-25E1C74005B4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8CA97EA6-7EBC-41D5-A6CC-FD4AA2E727B6}
+	EndGlobalSection
+EndGlobal
