@@ -2,7 +2,8 @@
 
 namespace Essenbee.Mix
 {
-    public class MixWord
+    // MixWord is non-nullable
+    public class MixWord : IEquatable<MixWord?>
     {
         private enum SignEnum
         {
@@ -11,9 +12,9 @@ namespace Essenbee.Mix
         };
 
         private SignEnum Sign { get; set; } = SignEnum.Positive;
-        private BitArray Fields = new BitArray(30);
+        private BitArray Fields = new(30);
 
-        public static int MAX_VALUE = 1_073_741_823;
+        public const int MAX_VALUE = 1_073_741_823;
 
         private int _value;
         public int Value
@@ -30,7 +31,7 @@ namespace Essenbee.Mix
 
                 if (_value > MAX_VALUE)
                 {
-                    throw new ArgumentOutOfRangeException("Value is outside the valid range!");
+                    throw new ArgumentOutOfRangeException($"Invalid value {(Sign == SignEnum.Negative ? -value : value)}");
                 }
 
                 Fields = new BitArray(new int[] { _value });
@@ -39,10 +40,14 @@ namespace Essenbee.Mix
 
         public int this[byte i]
         {
-            get
-            {
-                return this[i, i];
-            }
+            get => this[i, i];
+        }
+
+        public int FromFieldSpec(byte i)
+        {
+                var r = (byte)(i / 8);
+                var l = (byte)(i % 8);
+                return this[l, r];
         }
 
         public int this[byte l, byte r]
@@ -54,11 +59,15 @@ namespace Essenbee.Mix
                     throw new InvalidDataException("Fields property is null!");
                 }
 
-                SignEnum sign = Sign;
-
                 if ((l == 0) && (r == 0))
                 {
                     return (Sign == SignEnum.Negative) ? (-1) : 1;
+                }
+
+                if ((l == 0) && (r == 6))
+                {
+                    // ToDo: coded decimal
+                    throw new NotImplementedException("Coded decimal handling is an unimplemented feature");
                 }
 
                 if (l == 0 && r == 5)
@@ -94,14 +103,14 @@ namespace Essenbee.Mix
             Value = word.Value;
         }
 
-        public string ToOpString() => $"[{(Sign == SignEnum.Positive ? "+|" : "-|")}{string.Format("{0:D2}", this[1, 2])}|I={string.Format("{0:D2}", this[3])}|F={string.Format("{0:D2}", this[4])}|Op={string.Format("{0:D2}", this[5])}]";
+        public bool Equals(MixWord? other) => other is not null && Value == other.Value;
+        public string ToOpString() => $"[{(Sign == SignEnum.Positive ? "+|" : "-|")}{string.Format("{0:D2}", this[1, 2])}|I={string.Format("{0:D2}", this[3, 3])}|F={string.Format("{0:D2}", this[4, 4])}|Op={string.Format("{0:D2}", this[5, 5])}]";
 
         private int ReadFieldSpec(byte l, byte r)
         {
             int startIndex = 30 - (6 * r);
             int endIndex = 29 - ((l - 1) * 6);
-            int length = endIndex - startIndex;
-            BitArray subField = new BitArray(new int[] { 0 });
+            BitArray subField = new(new int[] { 0 });
             int j = 0;
 
             for (int i = startIndex; i < endIndex + 1; i++)
@@ -114,12 +123,22 @@ namespace Essenbee.Mix
             return result[0];
         }
 
+        // Overrides and Overloads
         public override string ToString() => $"[{(Sign == SignEnum.Positive ? "+|" : "-|")}{string.Format("{0:D2}", this[1])}|{string.Format("{0:D2}", this[2])}|{string.Format("{0:D2}", this[3])}|{string.Format("{0:D2}", this[4])}|{string.Format("{0:D2}", this[5])}]";
-
-        public static MixWord operator -(MixWord word) => new MixWord(-word.Value);
-        public static MixWord operator ++(MixWord word) => new MixWord(word.Value + 1);
-        public static MixWord operator --(MixWord word) => new MixWord(word.Value - 1);
-        public static MixWord operator +(MixWord word1, MixWord word2) => new MixWord(word1.Value + word2.Value);
-        public static MixWord operator -(MixWord word1, MixWord word2) => new MixWord(word1.Value - word2.Value);
+        public override bool Equals(object? obj) => Equals(obj as MixWord);
+        public override int GetHashCode() => HashCode.Combine(Value);
+        public static MixWord operator -(MixWord word) => new(-word.Value);
+        public static MixWord operator ++(MixWord word) => new(word.Value + 1);
+        public static MixWord operator --(MixWord word) => new(word.Value - 1);
+        public static MixWord operator +(MixWord word1, MixWord word2) => new(word1.Value + word2.Value);
+        public static MixWord operator -(MixWord word1, MixWord word2) => new(word1.Value - word2.Value);
+        public static bool operator ==(MixWord word1, MixWord word2) => word1.Equals(word2);
+        public static bool operator !=(MixWord word1, MixWord word2) => !word1.Equals(word2);
+        public static bool operator <(MixWord word1, MixWord word2) => word1.Value < word2.Value;
+        public static bool operator >(MixWord word1, MixWord word2) => word1.Value > word2.Value;
+        public static bool operator <=(MixWord word1, MixWord word2) => word1.Value <= word2.Value;
+        public static bool operator >=(MixWord word1, MixWord word2) => word1.Value >= word2.Value;
+        public static implicit operator int(MixWord word) => word.Value;
+        public static explicit operator MixWord(int i) => new(i);
     }
 }
