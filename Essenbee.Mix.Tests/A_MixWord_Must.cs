@@ -41,14 +41,14 @@ namespace Essenbee.Mix.Tests
         {
             var word = new MixWord(-357_913_941); // [-|010101|010101|010101|010101|010101]
 
-            var val00 = word.FromFieldSpec(FieldSpec.Instance(0, 0)); // -1
-            var val05 = word.FromFieldSpec(FieldSpec.Instance(0, 5)); // -357_913_941
-            var val02 = word.FromFieldSpec(FieldSpec.Instance(0, 2)); // -1_365
-            var val15 = word.FromFieldSpec(FieldSpec.Instance(1, 5)); // 357_913_941
-            var val25 = word.FromFieldSpec(FieldSpec.Instance(2, 5)); // 5_592_405
-            var val35 = word.FromFieldSpec(FieldSpec.Instance(3, 5)); // 87_381
-            var val44 = word.FromFieldSpec(FieldSpec.Instance(4, 4)); // 21
-            var val45 = word.FromFieldSpec(FieldSpec.Instance(4, 5)); // 1_365
+            var val00 = word.Read(FieldSpec.Instance(0, 0)); // -1
+            var val05 = word.Read(FieldSpec.Instance(0, 5)); // -357_913_941
+            var val02 = word.Read(FieldSpec.Instance(0, 2)); // -1_365
+            var val15 = word.Read(FieldSpec.Instance(1, 5)); // 357_913_941
+            var val25 = word.Read(FieldSpec.Instance(2, 5)); // 5_592_405
+            var val35 = word.Read(FieldSpec.Instance(3, 5)); // 87_381
+            var val44 = word.Read(FieldSpec.Instance(4, 4)); // 21
+            var val45 = word.Read(FieldSpec.Instance(4, 5)); // 1_365
 
             Assert.Equal(-357_913_941, word.Value);
             Assert.Equal(-1, val00);
@@ -212,6 +212,49 @@ namespace Essenbee.Mix.Tests
 
             Assert.Equal("[+|1000|I=01|F=(1:5)|Op=08]", opString1);
             Assert.Equal("[-|1000|I=01|F=(0:5)|Op=08]", opString2);
+        }
+
+        [Fact]
+        public void Correctly_Write_Data()
+        {
+            var memoryCell = new MixWord();
+            memoryCell.Write(1000, FieldSpec.Instance(1, 2));
+            Assert.Equal(1000, memoryCell[1, 2]);
+
+            memoryCell = new MixWord();
+            memoryCell.Write(1000, FieldSpec.Instance(0, 2));
+            Assert.Equal(1000, memoryCell[0, 2]);
+            memoryCell = new MixWord();
+            memoryCell.Write(-1000, FieldSpec.Instance(0, 2));
+            Assert.Equal(-1000, memoryCell[0, 2]);
+
+            // Change sign
+            memoryCell = new MixWord();
+            memoryCell.Write(60, FieldSpec.Instance(1, 2));
+            memoryCell.Write(-1, FieldSpec.Instance(0, 0));
+            Assert.Equal(-60, memoryCell[0, 2]);
+
+            // Ingore sign
+            memoryCell = new MixWord();
+            memoryCell.Write(-60, FieldSpec.Instance(1, 2));
+            Assert.Equal(60, memoryCell[1, 2]);
+            Assert.Equal(60, memoryCell[0, 2]); // Sign not to be set to -ve here!
+
+            memoryCell = new MixWord();
+            memoryCell.Write(60, FieldSpec.Instance(2, 2));
+            Assert.Equal(60, memoryCell[2, 2]);
+
+            // Write larger value into a 6-bit field
+            memoryCell = new MixWord();
+            memoryCell.Write(80, FieldSpec.Instance(2, 2)); // [000001|010000] -> [01|16]
+            Assert.Equal(16, memoryCell[2, 2]);
+
+            //Packed Word
+            memoryCell = new MixWord();
+            memoryCell.Write(10000, FieldSpec.Instance(1, 3));
+            memoryCell.Write(3000, FieldSpec.Instance(4, 5));
+            Assert.Equal(10000, memoryCell[1, 3]);
+            Assert.Equal(3000, memoryCell[4, 5]);
         }
     }
 }

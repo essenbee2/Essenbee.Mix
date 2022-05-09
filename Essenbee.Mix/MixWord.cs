@@ -1,5 +1,4 @@
 ﻿using Essenbee.Mix.Enums;
-using Essenbee.Mix.Extensions;
 using System.Collections;
 
 namespace Essenbee.Mix
@@ -41,7 +40,7 @@ namespace Essenbee.Mix
             get => this[i, i];
         }
 
-        public int FromFieldSpec(FieldSpec spec)
+        public int Read(FieldSpec spec)
         {
              return this[spec[0], spec[1]];
         }
@@ -66,6 +65,51 @@ namespace Essenbee.Mix
         {
             var indexer = this[5];
             return indexer;
+        }
+
+        public void Write (int data, FieldSpec spec)
+        {
+            if (spec is null)
+            {
+                throw new InvalidDataException("A valid FieldSpec must be provided - use the default if it is not required");
+            }
+
+            if (spec.Length == 1)
+            {
+                Sign = (data < 0) ? SignEnum.Negative : SignEnum.Positive;
+                return;
+            }
+
+            if (spec[0] == 0 && spec.Length == 30)
+            {
+                Value = data;
+            }
+            else if (spec[0] == 1 && spec.Length == 30)
+            {
+                var priorSign = Sign;
+                Value = data;
+                Sign = priorSign;
+            }
+            else 
+            {
+                var left = spec[0];
+                var priorSign = Sign;
+
+                if (left == 0)
+                {
+                    left++;
+                    Sign = (data < 0) ? SignEnum.Negative : SignEnum.Positive;
+                }
+
+                var startPos = (30 - spec.Length) - ( 6 * (left - 1));
+                var dataBits = new BitArray(new int[] { Math.Abs(data) });
+                var j = 0;
+
+                for (int i = startPos; i < (startPos + spec.Length); i++)
+                {
+                    Fields.Set(i, dataBits[j++]);
+                }
+            }
         }
 
         public void SetInstructionWord(byte opCode, short address, FieldSpec spec, byte indexRegister = 0)

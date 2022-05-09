@@ -26,5 +26,32 @@ namespace Essenbee.Mix.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => FieldSpec.Instance(63));
             Assert.Throws<ArgumentOutOfRangeException>(() => FieldSpec.Instance(2, 0)); // Wrong order!
         }
+
+        [Fact]
+        public void Have_Correct_Length()
+        {
+            var spec = FieldSpec.Instance(0, 5);
+            Assert.Equal(30, spec.Length);
+            spec = FieldSpec.Instance(1, 5);
+            Assert.Equal(30, spec.Length);
+            spec = FieldSpec.Instance(2, 5);
+            Assert.Equal(24, spec.Length);
+            spec = FieldSpec.Instance(3, 5);
+            Assert.Equal(18, spec.Length);
+            spec = FieldSpec.Instance(4, 5);
+            Assert.Equal(12, spec.Length);
+            spec = FieldSpec.Instance(5, 5);
+            Assert.Equal(6, spec.Length);
+            spec = FieldSpec.Instance(4, 4);
+            Assert.Equal(6, spec.Length);;
+            spec = FieldSpec.Instance(3, 3);
+            Assert.Equal(6, spec.Length);
+            spec = FieldSpec.Instance(2, 2);
+            Assert.Equal(6, spec.Length);;
+            spec = FieldSpec.Instance(1, 1);
+            Assert.Equal(6, spec.Length);
+            spec = FieldSpec.Instance(0, 0);
+            Assert.Equal(1, spec.Length); // Sign Bit
+        }
     }
 }

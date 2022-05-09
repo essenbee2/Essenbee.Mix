@@ -4,9 +4,30 @@
     {
         private FieldSpec(byte left, byte right) : base(left, right)
         {
+            var posLeft = left;
+            var posRight = right;
+
+            if (posLeft != 0 && posLeft == posRight)
+            {
+                Length = 6;
+            }
+            else if (posLeft == posRight)
+            {
+                Length = 1;
+            }
+            else
+            { 
+                if (posLeft == 0)
+                {
+                    posLeft++;
+                }
+
+                Length = ((posRight - posLeft) + 1) * 6;
+            }
         }
 
         public static FieldSpec Default { get => new(0, 5); }
+        public int Length { get; set; }
         public static int Value(FieldSpec fieldSpec)
         {
             return (fieldSpec[1] * 8) + fieldSpec[0];
