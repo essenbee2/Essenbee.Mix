@@ -203,11 +203,11 @@ namespace Essenbee.Mix.Tests
         public void Correctly_Set_Instruction()
         {
             var instruction = new MixWord();
-            instruction.SetInstructionWord(8, 1000, FieldSpec.Instance(1, 5), 1);
+            instruction.Write(8, 1000, FieldSpec.Instance(1, 5), 1);
 
             // Expect [+|1111101000|000001|101001|001000] -> [+|1000|I=01|F=(1:5)|Op=08]
             var opString1 = instruction.ToOpString();
-            instruction.SetInstructionWord(8, -1000, FieldSpec.Default, 1);
+            instruction.Write(8, -1000, FieldSpec.Default, 1);
             var opString2 = instruction.ToOpString();
 
             Assert.Equal("[+|1000|I=01|F=(1:5)|Op=08]", opString1);

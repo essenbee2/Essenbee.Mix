@@ -112,7 +112,7 @@ namespace Essenbee.Mix
             }
         }
 
-        public void SetInstructionWord(byte opCode, short address, FieldSpec spec, byte indexRegister = 0)
+        public void Write(byte opCode, short address, FieldSpec spec, byte indexRegister = 0)
         {
             if (address < -3_999 || address > 3_999)
             {
