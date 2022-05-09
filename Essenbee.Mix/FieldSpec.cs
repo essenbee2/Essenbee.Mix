@@ -6,7 +6,12 @@
         {
         }
 
-        public static FieldSpec Get(byte spec)
+        public static FieldSpec Default { get => new(0, 5); }
+        public static int Value(FieldSpec fieldSpec)
+        {
+            return (fieldSpec[1] * 8) + fieldSpec[0];
+        }
+        public static FieldSpec Instance(byte spec)
         {
             var right = (byte)(spec / 8);
             var left = (byte)(spec % 8);
@@ -15,7 +20,7 @@
             return new FieldSpec(left, right);
         }
 
-        public static FieldSpec Get(byte left, byte right)
+        public static FieldSpec Instance(byte left, byte right)
         {
             ThrowIfArgsInvalid(left, right);
             return new FieldSpec(left, right);
@@ -46,6 +51,7 @@
         public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), Item1, Item2);
         public static bool operator ==(FieldSpec? left, FieldSpec? right) => EqualityComparer<FieldSpec>.Default.Equals(left, right);
         public static bool operator !=(FieldSpec? left, FieldSpec? right) => !(left == right);
+        public override string ToString() => $"({this[0]}:{this[1]})";
 
         public static void ThrowIfArgsInvalid(byte left, byte right)
         {

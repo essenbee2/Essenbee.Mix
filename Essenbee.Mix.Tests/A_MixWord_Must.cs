@@ -41,14 +41,14 @@ namespace Essenbee.Mix.Tests
         {
             var word = new MixWord(-357_913_941); // [-|010101|010101|010101|010101|010101]
 
-            var val00 = word.FromFieldSpec(FieldSpec.Get(0, 0)); // -1
-            var val05 = word.FromFieldSpec(FieldSpec.Get(0, 5)); // -357_913_941
-            var val02 = word.FromFieldSpec(FieldSpec.Get(0, 2)); // -1_365
-            var val15 = word.FromFieldSpec(FieldSpec.Get(1, 5)); // 357_913_941
-            var val25 = word.FromFieldSpec(FieldSpec.Get(2, 5)); // 5_592_405
-            var val35 = word.FromFieldSpec(FieldSpec.Get(3, 5)); // 87_381
-            var val44 = word.FromFieldSpec(FieldSpec.Get(4, 4)); // 21
-            var val45 = word.FromFieldSpec(FieldSpec.Get(4, 5)); // 1_365
+            var val00 = word.FromFieldSpec(FieldSpec.Instance(0, 0)); // -1
+            var val05 = word.FromFieldSpec(FieldSpec.Instance(0, 5)); // -357_913_941
+            var val02 = word.FromFieldSpec(FieldSpec.Instance(0, 2)); // -1_365
+            var val15 = word.FromFieldSpec(FieldSpec.Instance(1, 5)); // 357_913_941
+            var val25 = word.FromFieldSpec(FieldSpec.Instance(2, 5)); // 5_592_405
+            var val35 = word.FromFieldSpec(FieldSpec.Instance(3, 5)); // 87_381
+            var val44 = word.FromFieldSpec(FieldSpec.Instance(4, 4)); // 21
+            var val45 = word.FromFieldSpec(FieldSpec.Instance(4, 5)); // 1_365
 
             Assert.Equal(-357_913_941, word.Value);
             Assert.Equal(-1, val00);
@@ -88,9 +88,10 @@ namespace Essenbee.Mix.Tests
         [Fact]
         public void ToOpString_Correctly()
         {
-            var word = new MixWord(-357_827_925); // [-|010101|010101|000000|010101|010101]
+            var word = new MixWord(-357_827_669); // [-|010101|010101|000000|010001|010101]
+            var opString = word.ToOpString();
 
-            Assert.Equal("[-|1365|I=00|F=21|Op=21]", word.ToOpString());
+            Assert.Equal("[-|1365|I=00|F=(1:2)|Op=21]", opString);
         }
 
         [Fact]
@@ -196,6 +197,21 @@ namespace Essenbee.Mix.Tests
             Assert.Equal(42, word2.Value);
             Assert.Equal(1_552, dvalue);
             Assert.Equal(0, evalue);
+        }
+
+        [Fact]
+        public void Correctly_Set_Instruction()
+        {
+            var instruction = new MixWord();
+            instruction.SetInstructionWord(8, 1000, FieldSpec.Instance(1, 5), 1);
+
+            // Expect [+|1111101000|000001|101001|001000] -> [+|1000|I=01|F=(1:5)|Op=08]
+            var opString1 = instruction.ToOpString();
+            instruction.SetInstructionWord(8, -1000, FieldSpec.Default, 1);
+            var opString2 = instruction.ToOpString();
+
+            Assert.Equal("[+|1000|I=01|F=(1:5)|Op=08]", opString1);
+            Assert.Equal("[-|1000|I=01|F=(0:5)|Op=08]", opString2);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Essenbee.Mix.Enums;
+using Essenbee.Mix.Extensions;
 using System.Collections;
 
 namespace Essenbee.Mix
@@ -10,6 +11,8 @@ namespace Essenbee.Mix
         private BitArray Fields = new(30);
 
         public const int MAX_VALUE = 1_073_741_823;
+        public const int BYTE_SIZE = 6;
+        public const int ADDRESS_SIZE = 12;
 
         private int _value;
         public int Value
@@ -65,11 +68,11 @@ namespace Essenbee.Mix
             return indexer;
         }
 
-        public void SetInstructionWord(byte opCode, short address, byte fieldSpec = 0, byte indexRegister = 0)
+        public void SetInstructionWord(byte opCode, short address, FieldSpec spec, byte indexRegister = 0)
         {
-            if (address < 0 || address > 3_999)
+            if (address < -3_999 || address > 3_999)
             {
-                throw new ArgumentOutOfRangeException($"Address must be in the range 0 - 3999 (was {address})");
+                throw new ArgumentOutOfRangeException($"Address must be in the range -3999 to 3999 (was {address})");
             }
 
             if (indexRegister < 0 || indexRegister > 6)
@@ -77,10 +80,25 @@ namespace Essenbee.Mix
                 throw new ArgumentOutOfRangeException($"Index Register must be in the range 0 - 6 (was {indexRegister})");
             }
 
-            if (opCode < 0 || opCode > 6)
+            if (opCode < 0 || opCode > 63)
             {
                 throw new ArgumentOutOfRangeException($"Op Code must be in the range 0 - 63 (was {opCode})");
             }
+
+            if (spec is null)
+            {
+                throw new InvalidDataException("A valid FieldSpec must be provided - use the default if it is not required");
+            }
+
+            Fields = new BitArray(30);
+            Sign = address < 0 ? SignEnum.Negative : SignEnum.Positive;
+
+            var addressBits = new BitArray(new int[] { Math.Abs(address) });
+            var indexBits = new BitArray(new int[] { Math.Abs(indexRegister) });
+            var fieldSpecBits = new BitArray(new int[] { Math.Abs(FieldSpec.Value(spec)) });
+            var opBits = new BitArray(new int[] { Math.Abs(opCode) });
+
+            MapToFields(addressBits, indexBits, fieldSpecBits, opBits);
         }
 
         public int this[byte l, byte r]
@@ -139,7 +157,7 @@ namespace Essenbee.Mix
         }
 
         public bool Equals(MixWord? other) => other is not null && Value == other.Value;
-        public string ToOpString() => $"[{(Sign == SignEnum.Positive ? "+|" : "-|")}{string.Format("{0:D2}", this[1, 2])}|I={string.Format("{0:D2}", this[3, 3])}|F={string.Format("{0:D2}", this[4, 4])}|Op={string.Format("{0:D2}", this[5, 5])}]";
+        public string ToOpString() => $"[{(Sign == SignEnum.Positive ? "+|" : "-|")}{string.Format("{0:D2}", this[1, 2])}|I={string.Format("{0:D2}", this[3, 3])}|F={FieldSpec.Instance((byte)this[4, 4])}|Op={string.Format("{0:D2}", this[5, 5])}]";
 
         private int ReadFieldSpec(byte l, byte r)
         {
@@ -156,6 +174,29 @@ namespace Essenbee.Mix
             int[] result = new int[1];
             subField.CopyTo(result, 0);
             return result[0];
+        }
+
+        private void MapToFields(BitArray addressBits, BitArray indexBits, BitArray fieldSpecBits, BitArray opBits)
+        {
+            for (int i = 0; i < BYTE_SIZE; i++)
+            {
+                Fields.Set(i, opBits[i]);
+            }
+
+            for (int i = 0; i < BYTE_SIZE; i++)
+            {
+                Fields.Set(i + BYTE_SIZE, fieldSpecBits[i]);
+            }
+
+            for (int i = 0; i < BYTE_SIZE; i++)
+            {
+                Fields.Set(i + (2 * BYTE_SIZE), indexBits[i]);
+            }
+
+            for (int i = 0; i < ADDRESS_SIZE; i++)
+            {
+                Fields.Set(i + (3 * BYTE_SIZE), addressBits[i]);
+            }
         }
 
         // Overrides and Overloads
