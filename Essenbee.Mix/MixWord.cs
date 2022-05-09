@@ -1,17 +1,12 @@
-﻿using System.Collections;
+﻿using Essenbee.Mix.Enums;
+using System.Collections;
 
 namespace Essenbee.Mix
 {
     // MixWord is non-nullable
     public class MixWord : IEquatable<MixWord?>
     {
-        private enum SignEnum
-        {
-            Positive,
-            Negative,
-        };
-
-        private SignEnum Sign { get; set; } = SignEnum.Positive;
+        public SignEnum Sign { get; set; } = SignEnum.Positive;
         private BitArray Fields = new(30);
 
         public const int MAX_VALUE = 1_073_741_823;
@@ -43,11 +38,49 @@ namespace Essenbee.Mix
             get => this[i, i];
         }
 
-        public int FromFieldSpec(byte i)
+        public int FromFieldSpec(FieldSpec spec)
         {
-                var r = (byte)(i / 8);
-                var l = (byte)(i % 8);
-                return this[l, r];
+             return this[spec[0], spec[1]];
+        }
+
+        public int GetFieldSpec()
+        {
+            return this[4];
+        }
+
+        public int GetAddress()
+        {
+            return this[0, 2];
+        }
+
+        public int GetIndexer()
+        {
+            var indexer = this[3];
+            return indexer;
+        }
+
+        public int GetOpCode()
+        {
+            var indexer = this[5];
+            return indexer;
+        }
+
+        public void SetInstructionWord(byte opCode, short address, byte fieldSpec = 0, byte indexRegister = 0)
+        {
+            if (address < 0 || address > 3_999)
+            {
+                throw new ArgumentOutOfRangeException($"Address must be in the range 0 - 3999 (was {address})");
+            }
+
+            if (indexRegister < 0 || indexRegister > 6)
+            {
+                throw new ArgumentOutOfRangeException($"Index Register must be in the range 0 - 6 (was {indexRegister})");
+            }
+
+            if (opCode < 0 || opCode > 6)
+            {
+                throw new ArgumentOutOfRangeException($"Op Code must be in the range 0 - 63 (was {opCode})");
+            }
         }
 
         public int this[byte l, byte r]
@@ -58,6 +91,8 @@ namespace Essenbee.Mix
                 {
                     throw new InvalidDataException("Fields property is null!");
                 }
+
+                FieldSpec.ThrowIfArgsInvalid(l, r);
 
                 if ((l == 0) && (r == 0))
                 {

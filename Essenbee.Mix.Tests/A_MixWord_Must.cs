@@ -1,14 +1,16 @@
+using System;
 using Xunit;
 
 namespace Essenbee.Mix.Tests
 {
-    public class A_Mix_Word_Must
+    public class A_MixWord_Must
     {
         [Fact]
         public void Represent_Valid_Values_Correctly()
         {
             var word = new MixWord(-357_913_941); // [-|010101|010101|010101|010101|010101]
 
+            // Field access by indices...
             var val00 = word[0, 0]; // -1
             var val05 = word[0, 5]; // -357_913_941
             var val02 = word[0, 2]; // -1_365
@@ -17,6 +19,36 @@ namespace Essenbee.Mix.Tests
             var val35 = word[3, 5]; // 87_381
             var val44 = word[4, 4]; // 21
             var val45 = word[4, 5]; // 1_365
+
+            Assert.Equal(-357_913_941, word.Value);
+            Assert.Equal(Enums.SignEnum.Negative, word.Sign);
+            Assert.Equal(-1, val00);
+            Assert.Equal(-357_913_941, val05);
+            Assert.Equal(357_913_941, val15);
+            Assert.Equal(-1_365, val02);
+            Assert.Equal(5_592_405, val25);
+            Assert.Equal(87_381, val35);
+            Assert.Equal(21, val44);
+            Assert.Equal(1_365, val45);
+
+            // Throw exception if indices are out of range...
+            Assert.Throws<ArgumentOutOfRangeException>(() => word[2, 1]); // Wrong order!
+            Assert.Throws<ArgumentOutOfRangeException>(() => word[0, 7]); // Right value is too big
+        }
+
+        [Fact]
+        public void Get_Values_By_FieldSpec_Correctly()
+        {
+            var word = new MixWord(-357_913_941); // [-|010101|010101|010101|010101|010101]
+
+            var val00 = word.FromFieldSpec(FieldSpec.Get(0, 0)); // -1
+            var val05 = word.FromFieldSpec(FieldSpec.Get(0, 5)); // -357_913_941
+            var val02 = word.FromFieldSpec(FieldSpec.Get(0, 2)); // -1_365
+            var val15 = word.FromFieldSpec(FieldSpec.Get(1, 5)); // 357_913_941
+            var val25 = word.FromFieldSpec(FieldSpec.Get(2, 5)); // 5_592_405
+            var val35 = word.FromFieldSpec(FieldSpec.Get(3, 5)); // 87_381
+            var val44 = word.FromFieldSpec(FieldSpec.Get(4, 4)); // 21
+            var val45 = word.FromFieldSpec(FieldSpec.Get(4, 5)); // 1_365
 
             Assert.Equal(-357_913_941, word.Value);
             Assert.Equal(-1, val00);
@@ -30,28 +62,19 @@ namespace Essenbee.Mix.Tests
         }
 
         [Fact]
-        public void Get_Values_By_FieldSpec_Correctly()
+        public void Get_Instruction_Sections_Correctly()
         {
-            var word = new MixWord(-357_913_941); // [-|010101|010101|010101|010101|010101]
+            var word = new MixWord(-357_831_816); // [-|010101|010101|000001|010010|001000]
 
-            var val00 = word.FromFieldSpec(0); // -1
-            var val05 = word.FromFieldSpec(40); // -357_913_941
-            var val02 = word.FromFieldSpec(16); // -1_365
-            var val15 = word.FromFieldSpec(41); // 357_913_941
-            var val25 = word.FromFieldSpec(42); // 5_592_405
-            var val35 = word.FromFieldSpec(43); // 87_381
-            var val44 = word.FromFieldSpec(36); // 21
-            var val45 = word.FromFieldSpec(44); // 1_365
+            var address = word.GetAddress(); // -1_365
+            var indexRegister = word.GetIndexer(); // 1
+            var fieldSpec = word.GetFieldSpec(); // 18
+            var op = word.GetOpCode(); // 8
 
-            Assert.Equal(-357_913_941, word.Value);
-            Assert.Equal(-1, val00);
-            Assert.Equal(-357_913_941, val05);
-            Assert.Equal(357_913_941, val15);
-            Assert.Equal(-1_365, val02);
-            Assert.Equal(5_592_405, val25);
-            Assert.Equal(87_381, val35);
-            Assert.Equal(21, val44);
-            Assert.Equal(1_365, val45);
+            Assert.Equal(-1_365, address);
+            Assert.Equal(1, indexRegister);
+            Assert.Equal(18, fieldSpec);
+            Assert.Equal(8, op);
         }
 
         [Fact]
@@ -143,7 +166,6 @@ namespace Essenbee.Mix.Tests
         {
             var word1 = new MixWord(7);
             var word2 = new MixWord(10);
-            var word3 = -word2;
 
             Assert.True(word1 < word2);
             Assert.True(word1 <= word2);
