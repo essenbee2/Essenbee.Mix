@@ -4,6 +4,11 @@ namespace Essenbee.Mix
 {
     public partial class Mix
     {
+        private void NOP(MixAddress addr, byte i, byte f)
+        {
+            PC++;
+        }
+
         // ==========================
         // Load Operators
         // ==========================

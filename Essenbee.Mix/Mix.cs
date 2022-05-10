@@ -9,27 +9,31 @@
             GREATER,
         };
 
+        public static ushort MEMSIZE = 4000;
+
         // Registers
-        public MixWord A { get; set; } = new(0);
-        public MixWord X { get; set; } = new(0);
-        public MixAddress[] I { get; set; } = new MixAddress[6];
-        public int PC { get; set; } = 0;
-        public MixWord J { get; set; } = new(0);
+        public MixWord A { get; set; } = new(0); // Accumulator
+        public MixWord X { get; set; } = new(0); // Extension Register
+        public MixAddress[] I { get; set; } = new MixAddress[6]; // Hold address offsets for indexing
+        public int PC { get; set; } = 0; // Program Counter
+        public MixWord J { get; set; } = new(0); // Jump Register
 
         // Flags
         public Comparison C { get; set; } = Comparison.EQUAL;
         public bool OV { get; set; } = false; // Overflow flag
 
-        public MixWord[] RAM = new MixWord[4000];
+        // Memory
+        public MixWord[] RAM = new MixWord[MEMSIZE];
 
-        public Dictionary<byte, MixOperator> MixOperators = new();
+        // Instruction Set
+        public Dictionary<byte, MixOperator> InstructionSet = new();
 
         public int ExecutionTime { get; set; } = 0;
 
         public Mix()
         {
             Initialise();
-            MixOperators = LoadMixOperators();
+            InstructionSet = LoadInstructionSet();
         }
 
         public void Reset()
@@ -63,10 +67,26 @@
             ExecutionTime = 0;
         }
 
-        public void Step()
+        public void Run()
+        {
+            while(true)
+            {
+                var lastOp = Step();
+
+                if (lastOp.Equals(5) || PC >= MEMSIZE )
+                {
+                    // HLT or PC exceeded memory
+                    break;
+                }
+            }
+        }
+
+        public byte Step()
         {
             var (opCode, addr, i, f) = RAM[PC].ReadOperator();
-            MixOperators[opCode].Exec(addr, i, f);
+            InstructionSet[opCode].Exec(addr, i, f);
+            ExecutionTime += InstructionSet[opCode].Timing;
+            return opCode;
         }
     }
 }
