@@ -44,5 +44,39 @@ namespace Essenbee.Mix
 
             PC++;
         }
+
+        private void LDAN(MixAddress addr, byte i, byte f)
+        {
+            var loc = addr + (i > 0 ? I[i - 1].Value : 0);
+
+            if (f == 0)
+            {
+                A.Sign = (RAM[loc].Sign == SignEnum.Negative) ? SignEnum.Positive : SignEnum.Negative;
+            }
+            else
+            {
+                A.Load(RAM[loc], FieldSpec.Instance(f));
+                A.Sign = (RAM[loc].Sign == SignEnum.Negative) ? SignEnum.Positive : SignEnum.Negative;
+            }
+
+            PC++;
+        }
+
+        private void LDXN(MixAddress addr, byte i, byte f)
+        {
+            var loc = addr + (i > 0 ? I[i - 1].Value : 0);
+
+            if (f == 0)
+            {
+                X.Sign = (RAM[loc].Sign == SignEnum.Negative) ? SignEnum.Positive : SignEnum.Negative;
+            }
+            else
+            {
+                X.Load(RAM[loc], FieldSpec.Instance(f));
+                X.Sign = (RAM[loc].Sign == SignEnum.Negative) ? SignEnum.Positive : SignEnum.Negative;
+            }
+
+            PC++;
+        }
     }
 }

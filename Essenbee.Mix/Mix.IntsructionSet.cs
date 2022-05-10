@@ -12,6 +12,9 @@
                 { 8, new MixOperator("LDA", LDA, 2) },
 
                 { 15, new MixOperator("LDX", LDX, 2) },
+                { 16, new MixOperator("LDAN", LDAN, 2) },
+
+                { 23, new MixOperator("LDXN", LDXN, 2) },
             };
         }
     }

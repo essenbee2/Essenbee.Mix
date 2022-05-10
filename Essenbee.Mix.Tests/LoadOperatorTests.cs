@@ -147,7 +147,7 @@ namespace Essenbee.Mix.Tests
             mix.PC = 0;
             mix.X = new MixWord(0);
             mix.RAM[0].Write(15, 2000, FieldSpec.Instance(1, 1));
-            mix.Step();
+            _ = mix.Step();
 
             mix.PC = 0;
             mix.X = new MixWord(0);
@@ -175,6 +175,40 @@ namespace Essenbee.Mix.Tests
 
             Assert.Equal(mix.RAM[2000].Value, mix.X);
             Assert.True(mix.X.Sign == SignEnum.Negative);
+        }
+
+        [Fact]
+        public void LDAN()
+        {
+            var mix = new Mix();
+            // Contents of memory cell 2000
+            mix.RAM[2000].Write(-80, FieldSpec.Instance(0, 2));
+            mix.RAM[2000].Write(3, FieldSpec.Instance(3, 3));
+            mix.RAM[2000].Write(5, FieldSpec.Instance(4, 4));
+            mix.RAM[2000].Write(4, FieldSpec.Instance(5, 5));
+
+            mix.RAM[0].Write(16, 2000, FieldSpec.Default);
+            _ = mix.Step();
+
+            Assert.Equal(mix.RAM[2000].Value, -mix.A);
+            Assert.True(mix.A.Sign == SignEnum.Positive);
+        }
+
+        [Fact]
+        public void LDXN()
+        {
+            var mix = new Mix();
+            // Contents of memory cell 2000
+            mix.RAM[2000].Write(-80, FieldSpec.Instance(0, 2));
+            mix.RAM[2000].Write(3, FieldSpec.Instance(3, 3));
+            mix.RAM[2000].Write(5, FieldSpec.Instance(4, 4));
+            mix.RAM[2000].Write(4, FieldSpec.Instance(5, 5));
+
+            mix.RAM[0].Write(23, 2000, FieldSpec.Default);
+            _ = mix.Step();
+
+            Assert.Equal(mix.RAM[2000].Value, -mix.X);
+            Assert.True(mix.X.Sign == SignEnum.Positive);
         }
     }
 }
