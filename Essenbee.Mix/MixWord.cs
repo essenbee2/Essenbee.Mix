@@ -39,9 +39,14 @@ namespace Essenbee.Mix
             get => this[i, i];
         }
 
+        public (byte, MixAddress, byte, byte) ReadOperator()
+        {
+            return ((byte)this[5], (MixAddress)this[0, 2], (byte)this[3], (byte)this[4]);
+        }
+
         public int Read(FieldSpec spec)
         {
-             return this[spec[0], spec[1]];
+            return this[spec[0], spec[1]];
         }
 
         public int GetFieldSpec()
@@ -66,14 +71,59 @@ namespace Essenbee.Mix
             return indexer;
         }
 
-        public void Write (int data, FieldSpec spec)
+        // Load right-shifts bits - used for loading registers
+        public void Load(MixWord word, FieldSpec spec)
         {
             if (spec is null)
             {
                 throw new InvalidDataException("A valid FieldSpec must be provided - use the default if it is not required");
             }
 
-            if (spec.Length == 1)
+            if (spec[0] == 0 && spec[1] == 0)
+            {
+                Sign = word.Sign;
+                return;
+            }
+
+            if (spec[0] == 0 && spec.Length == 30)
+            {
+                Value = word.Value;
+            }
+            else if (spec[0] == 1 && spec.Length == 30)
+            {
+                var priorSign = Sign;
+                Value = Math.Abs(word.Value);
+                Sign = priorSign;
+            }
+            else
+            {
+                var left = spec[0];
+
+                if (left == 0)
+                {
+                    left++;
+                    Sign = word.Sign;
+                }
+
+                var startPos = (30 - spec.Length) - (6 * (left - 1));
+                var j = 0;
+
+                for (int i = startPos; i < (startPos + spec.Length); i++)
+                {
+                    Fields.Set(j++, word.Fields[i]);
+
+                }
+            }
+        }
+
+        public void Write(int data, FieldSpec spec)
+        {
+            if (spec is null)
+            {
+                throw new InvalidDataException("A valid FieldSpec must be provided - use the default if it is not required");
+            }
+
+            if (spec[0] == 0 && spec[1] == 0)
             {
                 Sign = (data < 0) ? SignEnum.Negative : SignEnum.Positive;
                 return;
@@ -89,10 +139,9 @@ namespace Essenbee.Mix
                 Value = data;
                 Sign = priorSign;
             }
-            else 
+            else
             {
                 var left = spec[0];
-                var priorSign = Sign;
 
                 if (left == 0)
                 {
@@ -100,7 +149,7 @@ namespace Essenbee.Mix
                     Sign = (data < 0) ? SignEnum.Negative : SignEnum.Positive;
                 }
 
-                var startPos = (30 - spec.Length) - ( 6 * (left - 1));
+                var startPos = (30 - spec.Length) - (6 * (left - 1));
                 var dataBits = new BitArray(new int[] { Math.Abs(data) });
                 var j = 0;
 
@@ -157,7 +206,7 @@ namespace Essenbee.Mix
 
                 if ((l == 0) && (r == 0))
                 {
-                    return (Sign == SignEnum.Negative) ? (-1) : 1;
+                    return (Sign == SignEnum.Negative) ? (-1) : 0;
                 }
 
                 if ((l == 0) && (r == 6))
