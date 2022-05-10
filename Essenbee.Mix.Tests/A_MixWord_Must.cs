@@ -256,5 +256,19 @@ namespace Essenbee.Mix.Tests
             Assert.Equal(10000, memoryCell[1, 3]);
             Assert.Equal(3000, memoryCell[4, 5]);
         }
+
+        [Fact]
+        public void Read_Value_Correctly()
+        {
+            var word = new MixWord(0);
+            word.Write(-1, FieldSpec.Instance(0, 0));
+            word.Write(21, FieldSpec.Instance(1, 1));
+            word.Write(21, FieldSpec.Instance(2, 2));
+            word.Write(21, FieldSpec.Instance(3, 3));
+            word.Write(21, FieldSpec.Instance(4, 4));
+            word.Write(21, FieldSpec.Instance(5, 5));
+
+            Assert.Equal(-357_913_941, word.Value);
+        }
     }
 }

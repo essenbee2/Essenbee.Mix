@@ -13,10 +13,9 @@ namespace Essenbee.Mix
         public const int BYTE_SIZE = 6;
         public const int ADDRESS_SIZE = 12;
 
-        private int _value;
         public int Value
         {
-            get => (Sign == SignEnum.Negative) ? (-_value) : _value;
+            get => (Sign == SignEnum.Negative) ? (-this[1, 5]) : this[1, 5];
             set
             {
                 if (value < 0)
@@ -24,14 +23,14 @@ namespace Essenbee.Mix
                     Sign = SignEnum.Negative;
                 }
 
-                _value = Math.Abs(value);
+                var absValue = Math.Abs(value);
 
-                if (_value > MAX_VALUE)
+                if (absValue > MAX_VALUE)
                 {
                     throw new ArgumentOutOfRangeException($"Invalid value {(Sign == SignEnum.Negative ? -value : value)}");
                 }
 
-                Fields = new BitArray(new int[] { _value });
+                Fields = new BitArray(new int[] { absValue });
             }
         }
 
@@ -169,7 +168,7 @@ namespace Essenbee.Mix
 
                 if (l == 0 && r == 5)
                 {
-                    return (Sign == SignEnum.Negative) ? (-_value) : _value;
+                    return Value;
                 }
 
                 if (l == 0)
