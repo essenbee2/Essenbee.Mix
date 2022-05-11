@@ -81,7 +81,43 @@ namespace Essenbee.Mix
             PC++;
         }
 
-        private void LoadIReg(int n, MixAddress addr, byte i, byte f)
+        private void LD1N(MixAddress addr, byte i, byte f)
+        {
+            LoadIReg(0, addr, i, f, true);
+            PC++;
+        }
+
+        private void LD2N(MixAddress addr, byte i, byte f)
+        {
+            LoadIReg(1, addr, i, f, true);
+            PC++;
+        }
+
+        private void LD3N(MixAddress addr, byte i, byte f)
+        {
+            LoadIReg(2, addr, i, f, true);
+            PC++;
+        }
+
+        private void LD4N(MixAddress addr, byte i, byte f)
+        {
+            LoadIReg(3, addr, i, f, true);
+            PC++;
+        }
+
+        private void LD5N(MixAddress addr, byte i, byte f)
+        {
+            LoadIReg(4, addr, i, f, true);
+            PC++;
+        }
+
+        private void LD6N(MixAddress addr, byte i, byte f)
+        {
+            LoadIReg(5, addr, i, f, true);
+            PC++;
+        }
+
+        private void LoadIReg(int n, MixAddress addr, byte i, byte f, bool negate = false)
         {
             var spec = FieldSpec.Instance(f);
 
@@ -94,11 +130,13 @@ namespace Essenbee.Mix
 
             if (f == 0)
             {
-                I[n].Sign = RAM[loc].Sign;
+                I[n].Sign = (negate) 
+                    ? RAM[loc].Sign == SignEnum.Negative ? SignEnum.Positive : SignEnum.Negative
+                    : RAM[loc].Sign;
             }
             else
             {
-                var val = RAM[loc].Read(FieldSpec.Instance(f));
+                var val = (negate) ? -RAM[loc].Read(FieldSpec.Instance(f)) : RAM[loc].Read(FieldSpec.Instance(f));
                 I[n] =new MixAddress(val);
             }
         }
@@ -113,8 +151,7 @@ namespace Essenbee.Mix
             }
             else
             {
-                A.Load(RAM[loc], FieldSpec.Instance(f));
-                A.Sign = (RAM[loc].Sign == SignEnum.Negative) ? SignEnum.Positive : SignEnum.Negative;
+                A.Load(-RAM[loc], FieldSpec.Instance(f));
             }
 
             PC++;
@@ -130,8 +167,7 @@ namespace Essenbee.Mix
             }
             else
             {
-                X.Load(RAM[loc], FieldSpec.Instance(f));
-                X.Sign = (RAM[loc].Sign == SignEnum.Negative) ? SignEnum.Positive : SignEnum.Negative;
+                X.Load(-RAM[loc], FieldSpec.Instance(f));
             }
 
             PC++;

@@ -240,6 +240,36 @@ namespace Essenbee.Mix.Tests
             mix.RAM[0].Write(11, 2000, FieldSpec.Instance(1, 3));
             
             Assert.Throws<InvalidDataException>(() => mix.Step());
+        }
+
+        [Fact]
+        public void LDiN()
+        {
+            var mix = new Mix();
+            // Contents of memory cell 2000
+            mix.RAM[2000].Write(-80, FieldSpec.Instance(0, 2));
+            mix.RAM[2000].Write(3, FieldSpec.Instance(3, 3));
+            mix.RAM[2000].Write(5, FieldSpec.Instance(4, 4));
+            mix.RAM[2000].Write(4, FieldSpec.Instance(5, 5));
+
+            mix.RAM[0].Write(17, 2000, FieldSpec.Instance(0, 2));
+            _ = mix.Step();
+
+            Assert.Equal(80, mix.I[0].Value);
+            Assert.True(mix.I[0].Sign == SignEnum.Positive);
+
+            mix.PC = 0;
+            mix.RAM[0].Write(18, 2000, FieldSpec.Instance(1, 2));
+            _ = mix.Step();
+
+            Assert.Equal(-80, mix.I[1].Value);
+            Assert.True(mix.I[1].Sign == SignEnum.Negative);
+
+            // Try to save data that is too wide into I3
+            mix.PC = 0;
+            mix.RAM[0].Write(19, 2000, FieldSpec.Instance(1, 3));
+
+            Assert.Throws<InvalidDataException>(() => mix.Step());
 
         }
     }
